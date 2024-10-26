@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const axios = require("axios");
+const { JSDOM } = require('jsdom');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -9,138 +11,136 @@ app.listen(8080, () => {
     console.log('server listening on port 8080');
 });
 
-// index.js
 
-const cheerio = require("cheerio")
-const axios = require("axios")
+const client = new Client({
+    user: 'klei',
+    password: 'Man-45663',
+    host: 'database.server.com',
+    port: 5432,
+    database: 'mydb',
+})
+   
+await client.connect()
+
+const createTableQueryText = `
+    CREATE TABLE IF NOT EXISTS breakfast(
+    title TEXT,
+    ingredients JSONB,
+    time TEXT,
+    servings TEXT,
+    rating TEXT,
+    starCount SMALLINT,
+    steps TEXT []
+    );`;
+
+try {
+    await client.query(queryText);
+    console.log('Table created successfully');
+} catch (error) {
+    console.error('Error creating table:', error);
+}
 
 
-// Import jsdom
-const { JSDOM } = require('jsdom')
+
+
+
+const websites = ['https://www.allrecipes.com/recipe/158140/spaghetti-sauce-with-ground-beef/',
+                  'https://www.allrecipes.com/recipe/17891/golden-sweet-cornbread/',
+                  'https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/'
+                ];
+/*
+recipe {
+    title: string
+    description?: string
+    ingredients: map (ingredient (string): quantity (int))
+    time: string "Prep Time: __, Cook Time: __, Total Time: __"
+    servings: string "Servings: __"
+    rating: string "XX Stars From XX Ratings"
+    starCount: int  // sort recipe recommendations by starCount (highest to lowest)
+    steps: list of strings
+    htmlFile: response.data (to be displayed in the app?)
+}
+*/
 
 
 async function getRecipePage() {
 	try {
 		// Request recipe and "await" the response
-		const response = await axios.get(
-			'https://www.allrecipes.com/recipe/158140/spaghetti-sauce-with-ground-beef/'
-		)
-		console.log(response)
-        // Parse the given HTML document with jsdom
-        const document = new JSDOM(response.data).window
-        console.log(document)
-        // Use querySelector() to get the h2 element with the specified HTML class
-        // const heading = document.querySelector('title')
+
+        for (let j = 0; j < websites.length; j++) {
+
+            // fetch html file from the website
+            const response = await axios.get(websites[j]);
+            const htmlFile = response.data;
+
+            // parse the website html file
+            const dom = new JSDOM(htmlFile);
+
+            // recipe title
+            const recipeTitle = dom.window.document.getElementsByClassName("article-heading type--lion")[0].textContent;
+
+            // stars + rating counts
+            const starCount = dom.window.document.getElementById("mm-recipes-review-bar__rating_1-0").textContent;
+            const ratingCount = dom.window.document.getElementById("mm-recipes-review-bar__rating-count_1-0").textContent;
+            const ratingCountWithoutParens = ratingCount.slice(1, -1);
+            const rating = `${starCount} stars from ${ratingCountWithoutParens} ratings`;
+
+            // cook, prep, total times, num servings
+            const metricLabels = dom.window.document.getElementsByClassName("mm-recipes-details__label");
+            const metricValues = dom.window.document.getElementsByClassName("mm-recipes-details__value");
+            let time = "";
+            let servings = "";
+            for (let i = 0; i < metricLabels.length; i++) {
+                let metric = `${metricLabels[i].textContent} ${metricValues[i].textContent}`;
+                if (i === 0) time = metric;
+                else if (i < 3) time += `, ${metric}`;
+                else servings = metric;
+            }
+
+            // ingredient list and quantities
+            const ingredientQuantities = dom.window.document.querySelectorAll('[data-ingredient-quantity="true"]');
+            const ingredientUnits = dom.window.document.querySelectorAll('[data-ingredient-unit="true"]');
+            const ingredientNames = dom.window.document.querySelectorAll('[data-ingredient-name="true"]');
+            let ingredientsMap = new Map();
+
+            for (let i = 0; i < ingredientNames.length; i++) {
+                let ingredientName = ingredientNames[i].textContent.split(',')[0];
+                let ingredientAmount = `${ingredientQuantities[i].textContent} ${ingredientUnits[i].textContent}`;
+                ingredientsMap.set(ingredientName, ingredientAmount);
+            }
+            const ingredientsJson = JSON.stringify(Object.fromEntries(ingredientsMap));
+
+            // steps
+            const stepElements = dom.window.document.getElementById("mm-recipes-steps__content_1-0")
+                                                    .getElementsByClassName("comp mntl-sc-block mntl-sc-block-html");
+            const steps = []
+            for (let i = 0; i < stepElements.length; i++) {
+                steps.push(stepElements[i].textContent.trim());
+            }
+
+            let recipeData = {
+                title: recipeTitle,
+                // ingredients: ingredients,
+                time: time,
+                servings: servings,
+                rating: rating,
+                starCount: Number(starCount),
+                steps: steps,
+                // htmlFile: htmlFile
+
+            }
+
+            let insertQueryText = `
+                INSERT INTO breakfast(title, ingredients, time, servings, rating, starCount, steps)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)`;
+
+            client.query(insertQueryText, [recipeTitle, ingredientsJson, time, servings, rating, starCount, steps]);
+
+    
+        }
 
 	} catch (error) {
 		console.error(error)
 	}
 }
 getRecipePage()
-
-async function performScraping() {
-    // downloading the target web page
-    // by performing an HTTP GET request in Axios
-    const axiosResponse = await axios.request({
-        method: "GET",
-        url: "https://brightdata.com/",
-        headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
-        }
-    })
-    console.log(axiosResponse)
-
-    // parsing the HTML source of the target web page with Cheerio
-    const $ = cheerio.load(axiosResponse.data)
-
-    // initializing the data structures
-    // that will contain the scraped data
-    const industries = []
-    const marketLeaderReasons = []
-    const customerExperienceReasons = []
-
-    // scraping the "Learn how web data is used in your market" section
-    $(".elementor-element-7a85e3a8")
-        .find(".e-container")
-        .each((index, element) => {
-            // extracting the data of interest
-            const pageUrl = $(element).attr("href")
-            const image = $(element).find(".elementor-image-box-img img").attr("data-lazy-src")
-            const name = $(element).find(".elementor-image-box-content .elementor-image-box-title").text()
-            // console.log("in the industries.push() function")
-            // filtering out not interesting data
-            if (name && pageUrl) {
-                // converting the data extracted into a more
-                // readable object
-                const industry = {
-                    url: pageUrl,
-                    image: image,
-                    name: name
-                }
-
-                // adding the object containing the scraped data
-                // to the industries array
-                industries.push(industry)
-            }
-        })
-
-    // scraping the "What makes Bright Data
-    // the undisputed industry leader" section
-    $(".elementor-element-ef3e47e")
-        .find(".elementor-widget")
-        .each((index, element) => {
-            // extracting the data of interest
-            const image = $(element).find(".elementor-image-box-img img").attr("data-lazy-src")
-            const title = $(element).find(".elementor-image-box-title").text()
-            const description = $(element).find(".elementor-image-box-description").text()
-
-            // converting the data extracted into a more
-            // readable object
-            const marketLeaderReason = {
-                title: title,
-                image: image,
-                description: description,
-            }
-
-            // adding the object containing the scraped data
-            // to the marketLeaderReasons array
-            marketLeaderReasons.push(marketLeaderReason)
-        })
-
-    // scraping the "The best customer experience in the industry" section
-    $(".elementor-element-288b23cd .elementor-text-editor")
-        .find("li")
-        .each((index, element) => {
-            // extracting the data of interest
-            const title = $(element).find("strong").text()
-            // since the title is part of the text, you have
-            // to remove it to get only the description
-            const description = $(element).text().replace(title, "").trim()
-
-            // converting the data extracted into a more
-            // readable object
-            const customerExperienceReason = {
-                title: title,
-                description: description,
-            }
-
-            // adding the object containing the scraped data
-            // to the customerExperienceReasons array
-            customerExperienceReasons.push(customerExperienceReason)
-        })
-
-    // trasforming the scraped data into a general object
-    const scrapedData = {
-        industries: industries,
-        marketLeader: marketLeaderReasons,
-        customerExperience: customerExperienceReasons,
-    }
-
-    // converting the scraped data object to JSON
-    const scrapedDataJSON = JSON.stringify(scrapedData)
-    // console.log(scrapedDataJSON)
-
-    // storing scrapedDataJSON in a database via an API call...
-}
-
-// performScraping()
