@@ -3,6 +3,7 @@ const app = express();
 const axios = require("axios");
 const { JSDOM } = require('jsdom');
 const { Client } = require('pg');
+const puppeteer = require('puppeteer');
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -24,18 +25,21 @@ const client = new Client({
         rejectUnauthorized: false,  // Bypass certificate verification if you don't have a local cert
       }
 })
-console.log('created Client object');
+// console.log('created Client object');
 
 
 const createTableQueryText = `
     CREATE TABLE IF NOT EXISTS breakfast(
     title TEXT,
-    ingredients JSONB,
+    description TEXT,
+    imageUrl TEXT
+    rating TEXT,
+    
     time TEXT,
     servings TEXT,
-    rating TEXT,
-
+    ingredients JSONB,
     steps TEXT []
+    url TEXT
     );`;
 
 // try {
@@ -44,6 +48,47 @@ const createTableQueryText = `
 // } catch (error) {
 //     console.error('Error creating table:', error);
 // }
+
+
+/*
+const puppeteer = require('puppeteer');
+
+(async () => {
+  // Launch a new browser session
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  // Navigate to the login page
+  await page.goto('https://example.com/login');
+
+  // Enter username and password
+  await page.type('#username', 'yourUsername');
+  await page.type('#password', 'yourPassword');
+
+  // Click the login button
+  await page.click('#loginButton');
+
+  // Wait for navigation to finish
+  await page.waitForNavigation();
+
+  // Navigate to the page you want to scrape (after login)
+  await page.goto('https://example.com/protected-page');
+
+  // Perform the scraping actions you need, e.g., get the page content
+  const data = await page.content();
+
+  // Process the data (this is just an example, you'll need to parse the content as needed)
+  console.log(data);
+
+  // Close the browser session
+  await browser.close();
+})();
+*/
+
+
+
+
+
 
 
 const breakfastUrls = ['https://www.allrecipes.com/recipe/21014/good-old-fashioned-pancakes/',
@@ -89,7 +134,7 @@ const lunchUrls = ['https://www.allrecipes.com/recipe/23891/grilled-cheese-sandw
                    'https://www.allrecipes.com/recipe/73963/pasta-salad-with-homemade-dressing/',
                    'https://www.allrecipes.com/recipe/13933/black-bean-and-corn-salad-ii/',
                    'https://www.allrecipes.com/recipe/24264/sloppy-joes-ii/',
-                   'https://www.allrecipes.com/recipe/47717/reuben-sandwich-ii/',
+                   'https://www.allrecipes.com/recipe/8499/basic-chicken-salad/',
                    'https://www.allrecipes.com/recipe/147103/delicious-egg-salad-for-sandwiches/',
                    'https://www.allrecipes.com/recipe/14415/cobb-salad/',
                    'https://www.allrecipes.com/recipe/16729/old-fashioned-potato-salad/'
@@ -147,6 +192,8 @@ const websites = ['https://www.allrecipes.com/recipe/158140/spaghetti-sauce-with
                   'https://www.allrecipes.com/recipe/17891/golden-sweet-cornbread/',
                   'https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/'
                 ];
+
+// const websites = ["https://www.allrecipes.com/recipe/17891/golden-sweet-cornbread/"];
 /*
 recipe {
     title: string
@@ -161,8 +208,300 @@ recipe {
 }
 */
 
+// 16623
+// google oauth
 
-async function getRecipePage() {
+async function getRecipeAmericasTestKitchen() {
+    try {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+
+        await page.goto('https://www.americastestkitchen.com/sign_in');
+
+        // let elements = await page.$$('.SignInForm_form__86vFk'); 
+        // console.log(elements.length)
+
+        await page.type('[type="email"]', 'klei@andrew.cmu.edu');
+        await page.type('[type="password"]', 'Man-45663');
+
+        await page.click('.SignInForm_button__GOnId');
+        console.log("pressed sign in button")
+
+        await page.waitForNavigation({
+            waitUntil: 'networkidle0',
+        });
+
+        // console.log("after waiting")
+
+        // elements = await page.$$('.SignInForm_form__86vFk'); 
+        // console.log(elements.length)
+
+        // console.log("should not see the sign in form anymore")
+
+
+        // elements = await page.$$('.AccountDropdown-module_accountDropdown__kpDwC'); 
+        // console.log(elements.length)
+
+        // console.log("should see the account drop down")
+        for (let i = 16489; i < 16490; i++) {
+            await page.goto(`https://www.americastestkitchen.com/recipes/${i}`);
+
+            // title
+            const titleElement = await page.$('h1');
+            const title = await page.evaluate(titleElement => titleElement.textContent, titleElement);
+            console.log('Title:', title);
+
+            // rating
+            const ratingElement = await page.$('#recipe-header-rating-score');
+            const rating = await page.evaluate(ratingElement => ratingElement.textContent, ratingElement);
+            console.log('Rating:', rating);
+
+            // rating count
+            const ratingCountElement = await page.$('#recipe-header-rating-count');
+            const ratingCount = await page.evaluate(ratingCountElement => ratingCountElement.textContent.slice(1, -1), ratingCountElement);
+            console.log('Rating count:', ratingCount);
+
+            // tags
+            const tags = [];
+            const tagElements = await page.$$('.Link-module_chip__ATQxp');
+            for (const tagElement of tagElements) {
+                const tag = await page.evaluate(tagElement => tagElement.textContent, tagElement);
+                tags.push(tag);
+            }
+            console.log(tags);
+
+            // description
+            const descriptionElement = await page.$('[class="typography RecipePageHeader_description__1Xwwc typography-module_base__PkumT typography-module_open-xlg__MHo6f typography-module_proxima__HDZ4V"]');
+            const description = await page.evaluate(descriptionElement => descriptionElement.textContent, descriptionElement);
+            console.log(description);
+
+            // servings and / or time
+            let specs = "";
+            const specNameElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_caps-sm__OYAE9 typography-module_proxima__HDZ4V typography-module_font-weight--bold__xhayO"]');
+            const specQuantityElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-sm__6cWJa typography-module_proxima__HDZ4V"]');
+            for (let i = 0; i < specNameElements.length; i++) {
+                const specNameElement = specNameElements[i];
+                const specName = await page.evaluate(specNameElement => specNameElement.textContent, specNameElement);
+
+                const specQuantityElement = specQuantityElements[i];
+                const specQuantity = await page.evaluate(specQuantityElement => specQuantityElement.textContent, specQuantityElement);
+
+                let spec = `${specName.trim()}: ${specQuantity}`;
+
+                if (specs) specs += `\n${spec}`;
+                else specs = `${spec}`;
+            }
+            console.log(specs);
+
+
+            // image url
+            let imageUrl = "";
+            const imageElements = await page.$$('img');
+            for (const imageElement of imageElements) {
+                let alt = await page.evaluate(imageElement => imageElement.getAttribute('alt'), imageElement);
+                if (!alt) {
+                    imageUrl = await page.evaluate(imageElement => imageElement.getAttribute('src'), imageElement);
+                    break;
+                }
+            }
+            console.log(imageUrl);
+            // console.log(imageElement);
+            // const imageUrl = await page.evaluate(imageElement => imageElement.getAttribute('src'), imageElement);
+            // console.log(imageUrl);
+
+            // ingredients
+            const ingredientElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-lg__b6RLE typography-module_proxima__HDZ4V"]');
+            const ingredients = [];
+            let ingredientString = "";
+            for (const ingredientElement of ingredientElements) {
+                const ingredient = await page.evaluate(ingredientElement => ingredientElement.textContent, ingredientElement);
+                if (!ingredientString.includes(ingredient)) ingredients.push(ingredient);
+                ingredientString += ingredient;
+            }
+            console.log(ingredients)
+            console.log(ingredientString)
+
+            // steps
+            const stepElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-lg__b6RLE typography-module_proxima__HDZ4V typography-module_dangerouslySet__S4r6M"]');
+            let steps = [];
+            for (const stepElement of stepElements) {
+                const stepText = await page.evaluate(stepElement => stepElement.textContent, stepElement);
+                let splitByPeriod = stepText[i].stepText.trim().split(". ");
+                steps = [...steps, ...splitByPeriod];
+            }
+
+            console.log(steps);
+        }
+
+        await browser.close();
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+getRecipeAmericasTestKitchen()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function getRecipeAllRecipes() {
 	try {
         // console.log('in getRecipePage');
         // await client.connect();
@@ -171,7 +510,12 @@ async function getRecipePage() {
         // console.log("table created successfully");
 
 
-		// Request recipe and "await" the response
+
+
+
+
+
+
 
         for (let j = 0; j < websites.length; j++) {
 
@@ -184,6 +528,9 @@ async function getRecipePage() {
 
             // recipe title
             const recipeTitle = dom.window.document.getElementsByClassName("article-heading type--lion")[0].textContent;
+
+            // recipe description
+            const recipeDescription = dom.window.document.getElementsByClassName("article-subheading type--dog")[0].textContent;
 
             // stars + rating counts
             const starCount = dom.window.document.getElementById("mm-recipes-review-bar__rating_1-0").textContent;
@@ -217,24 +564,33 @@ async function getRecipePage() {
             const ingredientsJson = JSON.stringify(Object.fromEntries(ingredientsMap));
 
             // steps
-            const stepElements = dom.window.document.getElementById("mm-recipes-steps__content_1-0")
-                                                    .getElementsByClassName("comp mntl-sc-block mntl-sc-block-html");
-            let steps = []
-            for (let i = 0; i < stepElements.length; i++) {
-                let splitByPeriod = stepElements[i].textContent.trim().split(". ");
+            const stepElements = dom.window.document.getElementById("mm-recipes-steps__content_1-0");
+            const stepTextDescriptions = stepElements.getElementsByClassName("comp mntl-sc-block mntl-sc-block-html");
+            let steps = [];
+            for (let i = 0; i < stepTextDescriptions.length; i++) {
+                let splitByPeriod = stepTextDescriptions[i].textContent.trim().split(". ");
                 steps = [...steps, ...splitByPeriod];
             }
-            console.log(steps)
+            // console.log(steps)
+            const stepImages = stepElements.querySelectorAll("img[data-src]");
+            // console.log(stepImages.length);
+            const lastImage = stepImages[stepImages.length-1];
+            const lastImageUrl = lastImage.getAttribute('data-src');
+            // console.log(lastImageUrl);
+            
 
             let recipeData = {
                 title: recipeTitle,
-                ingredientsJson: ingredientsJson,
-                ingredientsMap: ingredientsMap,
+                description: recipeDescription,
+                imageUrl: lastImageUrl,
+                rating: rating,
+                starCount: Number(starCount),
                 time: time,
                 servings: servings,
-                rating: rating,
-                // starCount: Number(starCount),
+                ingredientsMap: ingredientsMap,
+                ingredientsJson: ingredientsJson,
                 steps: steps,
+                url: websites[j]
                 // htmlFile: htmlFile
 
             }
@@ -256,4 +612,4 @@ async function getRecipePage() {
 		console.error(error)
 	}
 }
-getRecipePage()
+// getRecipeAllRecipes()
