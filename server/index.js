@@ -4,43 +4,79 @@ const axios = require("axios");
 const { JSDOM } = require('jsdom');
 const { Client } = require('pg');
 const puppeteer = require('puppeteer');
+const cors = require('cors');
+
+app.use(cors({ origin: 'http://localhost:3000' })); // Replace with your frontend URL
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.listen(8080, () => {
-    console.log('server listening on port 8080');
-});
+// app.listen(8080, () => {
+//     console.log('server listening on port 8080');
+// });
 
 
 const client = new Client({
-    user: 'klei',
-    password: 'hey-chef-db-password',
-    host: 'hey-chef-db.cngq6g8kks7t.us-east-1.rds.amazonaws.com',
-    port: 5432,
-    database: 'mydb',
-    ssl: {
-        require: true,
-        rejectUnauthorized: false,  // Bypass certificate verification if you don't have a local cert
-      }
-})
+  user: 'postgres',
+  host: 'localhost',
+  database: 'mydb',
+  password: 'Man-45663',
+  port: 5432, // Default PostgreSQL port
+});
+
+client.connect()
+  .then(() => console.log('Connected to PostgreSQL database'))
+  .catch(err => console.error('Error connecting to database:', err));
+
+// // Example query
+// client.query('SELECT NOW()', (err, res) => {
+//   if (err) {
+//     console.error('Error executing query:', err);
+//   } else {
+//     console.log('Current time:', res.rows[0].now);
+//   }
+//   client.end();
+// });
+
+
+
+
+
+
+
+
+
+// const client = new Client({
+//     user: 'postgres',
+//     password: 'Man-45663',
+//     host: 'localhost',
+//     port: 5432,
+//     database: 'mydb',
+//     ssl: {
+//         require: true,
+//         rejectUnauthorized: false,  // Bypass certificate verification if you don't have a local cert
+//       }
+// })
 // console.log('created Client object');
 
 
 const createTableQueryText = `
-    CREATE TABLE IF NOT EXISTS breakfast(
+    CREATE TABLE IF NOT EXISTS testRecipes(
     title TEXT,
     description TEXT,
-    imageUrl TEXT
+    imageUrl TEXT,
     rating TEXT,
-    
-    time TEXT,
-    servings TEXT,
-    ingredients JSONB,
-    steps TEXT []
+    ratingCount TEXT,
+    timeAndServings TEXT,
+    ingredients TEXT [],
+    steps TEXT [],
     url TEXT
     );`;
+
+const addUrlConstraintQuery = `
+    ALTER TABLE testRecipes
+    ADD CONSTRAINT unique_url UNIQUE (url);`
 
 // try {
 //     await client.query(queryText);
@@ -50,150 +86,6 @@ const createTableQueryText = `
 // }
 
 
-/*
-const puppeteer = require('puppeteer');
-
-(async () => {
-  // Launch a new browser session
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  // Navigate to the login page
-  await page.goto('https://example.com/login');
-
-  // Enter username and password
-  await page.type('#username', 'yourUsername');
-  await page.type('#password', 'yourPassword');
-
-  // Click the login button
-  await page.click('#loginButton');
-
-  // Wait for navigation to finish
-  await page.waitForNavigation();
-
-  // Navigate to the page you want to scrape (after login)
-  await page.goto('https://example.com/protected-page');
-
-  // Perform the scraping actions you need, e.g., get the page content
-  const data = await page.content();
-
-  // Process the data (this is just an example, you'll need to parse the content as needed)
-  console.log(data);
-
-  // Close the browser session
-  await browser.close();
-})();
-*/
-
-
-
-
-
-
-
-const breakfastUrls = ['https://www.allrecipes.com/recipe/21014/good-old-fashioned-pancakes/',
-                       'https://www.allrecipes.com/recipe/213717/chakchouka-shakshouka/',
-                       'https://www.allrecipes.com/recipe/16895/fluffy-french-toast/',
-                       'https://www.allrecipes.com/recipe/244251/no-cook-overnight-oatmeal/',
-                       'https://www.allrecipes.com/recipe/15057/overnight-blueberry-french-toast/',
-                       'https://www.allrecipes.com/recipe/220895/old-charleston-style-shrimp-and-grits/',
-                       'https://www.allrecipes.com/recipe/162760/fluffy-pancakes/',
-                       'https://www.allrecipes.com/recipe/257657/lemon-ricotta-pancakes/',
-                       'https://www.allrecipes.com/recipe/87013/hash-brown-and-egg-casserole/',
-                       'https://www.allrecipes.com/recipe/24148/easy-broccoli-quiche/',
-                       'https://www.allrecipes.com/recipe/16383/basic-crepes/',
-                       'https://www.allrecipes.com/recipe/51013/baked-oatmeal-ii/',
-                       'https://www.allrecipes.com/recipe/98390/megans-granola/',
-                       'https://www.allrecipes.com/recipe/17205/eggs-benedict/',
-                       'https://www.allrecipes.com/recipe/20513/classic-waffles/',
-                       'https://www.allrecipes.com/recipe/279754/chef-johns-blueberry-dutch-baby/',
-                       'https://www.allrecipes.com/recipe/20334/banana-pancakes-i/',
-                       'https://www.allrecipes.com/recipe/23900/german-apple-pancake/',
-                       'https://www.allrecipes.com/recipe/244767/cinnamon-roll-pancakes/',
-                       'https://www.allrecipes.com/recipe/228426/loaded-vegetarian-quiche/',
-                       'https://www.allrecipes.com/recipe/24532/sausage-casserole/',
-                       'https://www.allrecipes.com/recipe/143886/creamy-strawberry-crepes/',
-                       'https://www.allrecipes.com/recipe/57783/emilys-famous-hash-browns/'
-                    ];
-
-const lunchUrls = ['https://www.allrecipes.com/recipe/23891/grilled-cheese-sandwich/',
-                   'https://www.allrecipes.com/recipe/187342/banh-mi/',
-                   'https://www.allrecipes.com/recipe/47717/reuben-sandwich-ii/',
-                   'https://www.allrecipes.com/recipe/188473/buffalo-chicken-wraps/',
-                   'https://www.allrecipes.com/recipe/13309/rich-and-simple-french-onion-soup/',
-                   'https://www.allrecipes.com/recipe/77981/butternut-squash-soup-ii/',
-                   'https://www.allrecipes.com/recipe/26460/quick-and-easy-chicken-noodle-soup/',
-                   'https://www.allrecipes.com/recipe/13113/rich-and-creamy-tomato-basil-soup/',
-                   'https://www.allrecipes.com/recipe/39544/garden-fresh-tomato-soup/',
-                   'https://www.allrecipes.com/recipe/49552/quinoa-and-black-beans/',
-                   'https://www.allrecipes.com/recipe/62763/terrific-turkey-chili/',
-                   'https://www.allrecipes.com/recipe/20447/cheesy-tuna-melts/',
-                   'https://www.allrecipes.com/recipe/85933/the-ultimate-pasta-salad/',
-                   'https://www.allrecipes.com/recipe/143069/super-delicious-zuppa-toscana/',
-                   'https://www.allrecipes.com/recipe/13045/broccoli-cheese-soup/',
-                   'https://www.allrecipes.com/recipe/73963/pasta-salad-with-homemade-dressing/',
-                   'https://www.allrecipes.com/recipe/13933/black-bean-and-corn-salad-ii/',
-                   'https://www.allrecipes.com/recipe/24264/sloppy-joes-ii/',
-                   'https://www.allrecipes.com/recipe/8499/basic-chicken-salad/',
-                   'https://www.allrecipes.com/recipe/147103/delicious-egg-salad-for-sandwiches/',
-                   'https://www.allrecipes.com/recipe/14415/cobb-salad/',
-                   'https://www.allrecipes.com/recipe/16729/old-fashioned-potato-salad/'
-                ];
-
-const dinnerUrls = ['https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/',
-                    'https://www.allrecipes.com/recipe/158140/spaghetti-sauce-with-ground-beef/',
-                    'https://www.allrecipes.com/recipe/172958/no-noodle-zucchini-lasagna/',
-                    'https://www.allrecipes.com/recipe/14685/slow-cooker-beef-stew-i/',
-                    'https://www.allrecipes.com/recipe/15925/creamy-au-gratin-potatoes/',
-                    'https://www.allrecipes.com/recipe/26317/chicken-pot-pie-ix/',
-                    'https://www.allrecipes.com/recipe/16354/easy-meatloaf/',
-                    'https://www.allrecipes.com/recipe/216888/good-new-orleans-creole-gumbo/',
-                    'https://www.allrecipes.com/recipe/31848/jambalaya/',
-                    'https://www.allrecipes.com/recipe/11758/baked-ziti-i/',
-                    'https://www.allrecipes.com/recipe/11679/homemade-mac-and-cheese/',
-                    'https://www.allrecipes.com/recipe/18379/best-green-bean-casserole/',
-                    'https://www.allrecipes.com/recipe/242352/greek-lemon-chicken-and-potatoes/',
-                    'https://www.allrecipes.com/recipe/12720/grilled-salmon-i/',
-                    'https://www.allrecipes.com/recipe/14759/pork-dumplings/',
-                    'https://www.allrecipes.com/recipe/17991/stuffed-green-peppers-i/',
-                    'https://www.allrecipes.com/recipe/18417/spanakopita-greek-spinach-pie/',
-                    'https://www.allrecipes.com/recipe/14497/portobello-mushroom-burgers/',
-                    'https://www.allrecipes.com/recipe/58211/authentic-louisiana-red-beans-and-rice/',
-                    'https://www.allrecipes.com/recipe/79543/fried-rice-restaurant-style/',
-                    'https://www.allrecipes.com/recipe/85389/gourmet-mushroom-risotto/',
-                    'https://www.allrecipes.com/recipe/228823/quick-beef-stir-fry/'
-                ];
-
-const dessertUrls = ['https://www.allrecipes.com/recipe/12409/apple-crisp-ii/',
-                     'https://www.allrecipes.com/recipe/52547/triple-berry-crisp/',
-                     'https://www.allrecipes.com/recipe/8350/chantals-new-york-cheesecake/',
-                     'https://www.allrecipes.com/recipe/13477/double-layer-pumpkin-cheesecake/',
-                     'https://www.allrecipes.com/recipe/169305/sopapilla-cheesecake-pie/',
-                     'https://www.allrecipes.com/recipe/9174/peanut-butter-pie/',
-                     'https://www.allrecipes.com/recipe/12682/apple-pie-by-grandma-ople/',
-                     'https://www.allrecipes.com/recipe/12142/sweet-potato-pie-i/',
-                     'https://www.allrecipes.com/recipe/15093/grandmas-lemon-meringue-pie/',
-                     'https://www.allrecipes.com/recipe/23439/perfect-pumpkin-pie/',
-                     'https://www.allrecipes.com/recipe/17377/chocolate-cupcakes/',
-                     'https://www.allrecipes.com/recipe/153245/pumpkin-spice-cupcakes/',
-                     'https://www.allrecipes.com/recipe/230204/maris-banana-cupcakes/',
-                     'https://www.allrecipes.com/recipe/79313/carrot-cupcakes-with-white-chocolate-cream-cheese-icing/',
-                     'https://www.allrecipes.com/recipe/22749/the-best-banana-pudding/',
-                     'https://www.allrecipes.com/recipe/7177/bread-pudding-ii/',
-                     'https://www.allrecipes.com/recipe/19165/creme-brulee/',
-                     'https://www.allrecipes.com/limoncello-ricotta-cake-recipe-7970804',
-                     'https://www.allrecipes.com/recipe/25037/best-big-fat-chewy-chocolate-chip-cookie/',
-                     'https://www.allrecipes.com/recipe/17891/golden-sweet-cornbread/',
-                     'https://www.allrecipes.com/recipe/17981/one-bowl-chocolate-cake-iii/',
-                     'https://www.allrecipes.com/recipe/9827/chocolate-chocolate-chip-cookies-i/'
-                ];
-
-const websites = ['https://www.allrecipes.com/recipe/158140/spaghetti-sauce-with-ground-beef/',
-                  'https://www.allrecipes.com/recipe/17891/golden-sweet-cornbread/',
-                  'https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/'
-                ];
-
-// const websites = ["https://www.allrecipes.com/recipe/17891/golden-sweet-cornbread/"];
 /*
 recipe {
     title: string
@@ -213,13 +105,19 @@ recipe {
 
 async function getRecipeAmericasTestKitchen() {
     try {
+
+        // create table
+        await client.query(createTableQueryText);
+        // await client.query(addUrlConstraintQuery);
+        console.log('Table created successfully');
+
+
+
+
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
 
         await page.goto('https://www.americastestkitchen.com/sign_in');
-
-        // let elements = await page.$$('.SignInForm_form__86vFk'); 
-        // console.log(elements.length)
 
         await page.type('[type="email"]', 'klei@andrew.cmu.edu');
         await page.type('[type="password"]', 'Man-45663');
@@ -231,20 +129,23 @@ async function getRecipeAmericasTestKitchen() {
             waitUntil: 'networkidle0',
         });
 
-        // console.log("after waiting")
+        // 16489
+        // 2295
+        // let recipeNums = [2295, 16489, 14903] // all good
+        let recipeNums = [16624, 16489, 8114];
+        for (let i of recipeNums) {
+        // for (let i = 2295; i < 2296; i++) {
+            const recipeUrl = `https://www.americastestkitchen.com/recipes/${i}`;
+            console.log(recipeUrl)
+            await page.goto(recipeUrl);
 
-        // elements = await page.$$('.SignInForm_form__86vFk'); 
-        // console.log(elements.length)
+            // don't scrape if this is not a valid recipe url
+            let noRecipeElement = await page.$$('[class="errorPage_errorContent__0v4Lf"]');
+            console.log(noRecipeElement.length);
+            if (noRecipeElement.length > 0) continue;
 
-        // console.log("should not see the sign in form anymore")
 
 
-        // elements = await page.$$('.AccountDropdown-module_accountDropdown__kpDwC'); 
-        // console.log(elements.length)
-
-        // console.log("should see the account drop down")
-        for (let i = 16489; i < 16490; i++) {
-            await page.goto(`https://www.americastestkitchen.com/recipes/${i}`);
 
             // title
             const titleElement = await page.$('h1');
@@ -253,12 +154,14 @@ async function getRecipeAmericasTestKitchen() {
 
             // rating
             const ratingElement = await page.$('#recipe-header-rating-score');
-            const rating = await page.evaluate(ratingElement => ratingElement.textContent, ratingElement);
-            console.log('Rating:', rating);
+            if (ratingElement) rating = await page.evaluate(ratingElement => ratingElement.textContent, ratingElement);
+            else rating = "Not rated";
+            if (ratingElement) console.log('Rating:', rating);
 
             // rating count
             const ratingCountElement = await page.$('#recipe-header-rating-count');
-            const ratingCount = await page.evaluate(ratingCountElement => ratingCountElement.textContent.slice(1, -1), ratingCountElement);
+            if (ratingCountElement) ratingCount = await page.evaluate(ratingCountElement => ratingCountElement.textContent.slice(1, -1), ratingCountElement);
+            else ratingCount = "no ratings";
             console.log('Rating count:', ratingCount);
 
             // tags
@@ -276,7 +179,7 @@ async function getRecipeAmericasTestKitchen() {
             console.log(description);
 
             // servings and / or time
-            let specs = "";
+            let timeAndServings = "";
             const specNameElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_caps-sm__OYAE9 typography-module_proxima__HDZ4V typography-module_font-weight--bold__xhayO"]');
             const specQuantityElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-sm__6cWJa typography-module_proxima__HDZ4V"]');
             for (let i = 0; i < specNameElements.length; i++) {
@@ -288,10 +191,10 @@ async function getRecipeAmericasTestKitchen() {
 
                 let spec = `${specName.trim()}: ${specQuantity}`;
 
-                if (specs) specs += `\n${spec}`;
-                else specs = `${spec}`;
+                if (timeAndServings) timeAndServings += `\n${spec}`;
+                else timeAndServings = `${spec}`;
             }
-            console.log(specs);
+            console.log(timeAndServings);
 
 
             // image url
@@ -299,15 +202,12 @@ async function getRecipeAmericasTestKitchen() {
             const imageElements = await page.$$('img');
             for (const imageElement of imageElements) {
                 let alt = await page.evaluate(imageElement => imageElement.getAttribute('alt'), imageElement);
-                if (!alt) {
+                if (!alt || alt === title) {
                     imageUrl = await page.evaluate(imageElement => imageElement.getAttribute('src'), imageElement);
                     break;
                 }
             }
             console.log(imageUrl);
-            // console.log(imageElement);
-            // const imageUrl = await page.evaluate(imageElement => imageElement.getAttribute('src'), imageElement);
-            // console.log(imageUrl);
 
             // ingredients
             const ingredientElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-lg__b6RLE typography-module_proxima__HDZ4V"]');
@@ -319,33 +219,190 @@ async function getRecipeAmericasTestKitchen() {
                 ingredientString += ingredient;
             }
             console.log(ingredients)
-            console.log(ingredientString)
 
             // steps
-            const stepElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-lg__b6RLE typography-module_proxima__HDZ4V typography-module_dangerouslySet__S4r6M"]');
+            let stepElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-lg__b6RLE typography-module_proxima__HDZ4V typography-module_dangerouslySet__S4r6M"]');
+            stepElements = stepElements.slice(1);   // remove the "Before You Begin" section
             let steps = [];
             for (const stepElement of stepElements) {
                 const stepText = await page.evaluate(stepElement => stepElement.textContent, stepElement);
-                let splitByPeriod = stepText[i].stepText.trim().split(". ");
+                let splitByPeriod = stepText.trim().split(". ");
                 steps = [...steps, ...splitByPeriod];
             }
-
             console.log(steps);
-        }
 
+
+            /*
+            breakfast recipes -> Breakfast & Brunch
+            dessert recipes -> Desserts or Baked Goods
+            lunch and dinner recipes -> everything else
+            */
+
+            // CREATE TABLE IF NOT EXISTS testRecipes(
+            //     title TEXT,
+            //     description TEXT,
+            //     imageUrl TEXT
+            //     rating TEXT,
+            //     timeAndServings TEXT,
+            //     ingredients TEXT [],
+            //     steps TEXT [],
+            //     url TEXT
+            //     );`;
+            let insertQueryText = `
+                INSERT INTO testRecipes(title, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                ON CONFLICT (url) DO NOTHING`;
+
+            client.query(insertQueryText, [title, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, recipeUrl]);
+
+            // console.log(recipeData);
+
+            // const res = await client.query('SELECT * FROM testRecipes');
+            // console.log(res)
+            // await client.end();
+
+            // INSERT INTO tab_name(col_list)
+            // SELECT val_list
+            // WHERE
+            // NOT EXISTS (
+            // SELECT col_name FROM tab_name WHERE condition
+            // );
+
+
+            // INSERT INTO users (email, name)
+            // VALUES ('example@example.com', 'John Doe')
+            // ON CONFLICT (email) DO NOTHING;
+
+
+
+        }
+        console.log("select all from testRecipes table")
+        let res = await client.query('SELECT * FROM testRecipes');
+        console.log(res.rowCount)
+        // Accessing each row individually
+        let row1 = res.rows[0];
+        const row2 = res.rows[1];
+        const row3 = res.rows[2];
+
+        // Displaying each row (object) individually
+        console.log(row1); // First object
+        console.log(row2); // Second object
+        console.log(row3); // Third object
+
+        await client.end();
+        console.log("closing browser");
         await browser.close();
     } catch (error) {
         console.log(error)
     }
 }
 
-getRecipeAmericasTestKitchen()
+// getRecipeAmericasTestKitchen()
+
+
+/*
+- for every ingredient provided, check that it's in the ingredient list
+- keep track of number of ingredients in the recipe
+    - if you get through all ingredients in the recipe and you have all of them, we chillin
+*/
+
+function getRecipeRecommendations(ingredients, recipeCategory) {
+    /* some database query or api call to get recipes from the specified category */
+    let recipes; /* all the recipes retrieved from the database */
+    let recipeRecommendations = [];
+    
+    for (recipe of recipes) {
+        let recipeIngredients = []; /* the ingredients list for the recipe - list of strings */
+        let numMatchingIngredients = 0;
+
+        for (ingredient of ingredients) {
+            for (recipeIngredient of recipeIngredients) {
+                if (recipeIngredient.includes(ingredient)) {
+                    numMatchingIngredients += 1;
+                    break;
+            }
+            }
+        if (numMatchingIngredients == recipeIngredients.length) recipeRecommendations.push(recipe);
+        }
+    }
+}
 
 
 
 
+// some api stuff
+// const express = require('express');
+// const app = express();
+const port = 8080;
+const bodyParser = require('body-parser');
+
+// Middleware to parse JSON data from requests
+app.use(bodyParser.json());
+
+// Mock database interaction function (replace with your actual database query logic)
+const mockDatabase = [];
+const getUsers = () => mockDatabase;
+const addUser = (user) => mockDatabase.push(user);
+
+// Endpoint to retrieve users
+app.get('/api/users', (req, res) => {
+  const users = getUsers();
+  res.json(users);
+});
+
+// Endpoint to add a new user
+app.post('/api/users', (req, res) => {
+  const newUser = req.body;
+  addUser(newUser);
+  res.status(201).json({ message: 'User added successfully', user: newUser });
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
 
+app.post('/api/search', (req, res) => {
+    const searchPhrase = req.body;
+    console.log(searchPhrase);
+    res.status(200).json({message: `${searchPhrase} recipeee`});
+});
+
+app.post('/api/new-recipe', (req, res) => {
+    const newRecipe = req.body;
+    console.log(newRecipe);
+    res.status(200).json({message: 'new recipe added!'});
+})
+
+// app.post('/api/alena-test', (req, res) => {
+//     const reqBody = req.body;
+//     console.log(reqBody);
+//     res.status(200).json({message: 'hiii alena'});
+// })
+
+app.get('/api/alena-test', async (req, res) => {
+    let recipe = await client.query('SELECT * FROM testRecipes');
+    // Accessing each row individually
+    let row = recipe.rows[0];
+    res.status(200).json({message:row})
+})
+
+
+// const spices = new Set([
+//     'aidan fruit', 'carom seeds', 'ajwain', 'alexanders', 'alkanet', 'alligator pepper', 
+//     'mbongo spice', 'hepper pepper', 'allspice', 'angelica', 'anise', 'star anise', 'aniseed myrtle',
+//     'annatto', 'artemisia', 'asafoetida', 'avens', 'avocado leaf', 'barberry', 'sweet basil', 
+//     'african basil', 'holy basil', 'lemon basil', 'thai basil', 'bay leaf', 'bay leaves',
+//     'blue melilot', 'blue fenugreek', 'boldo', 'borage', 'california bay laurel', 
+//     'black cardamom', 'nutmeg', ''
+// ])
+
+
+// const spices = new Set([
+//     'allspice', 'anise', 'star anise', 'basil', 'bay leaf', 'bay leaves', 'nutmeg',
+//     'caper', 'capers', 'caraway', 'caraway seeds', 'caraway seed', 'cardamom',
+//     'black cardamom', 'cassia', 'cayenne pepper', 'celery leaf', 
+// ])
 
 
 
