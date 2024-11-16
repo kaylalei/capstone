@@ -50,15 +50,19 @@ export default function NavBar() {
         <StyledToolbar variant="dense" disableGutters>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-              <Button variant="text" color="info" size="small">
-                <b>Hey CHEF!</b>
-              </Button>
-              <Button variant="text" color="info" size="small">
+              <a href="http://localhost:3000/">
+                <Button variant="text" color="info" size="small">
+                  <b>Hey CHEF!</b>
+                </Button>
+              </a>
+              {/* <Button variant="text" color="info" size="small">
                 Favorites
-              </Button>
-              <Button variant="text" color="info" size="small">
-                New Recipe
-              </Button>
+              </Button> */}
+              <a href="http://localhost:3000/new-recipe">
+                <Button variant="text" color="info" size="small">
+                    New Recipe
+                </Button>
+              </a>
             </Box>
           </Box>
           <Box
