@@ -29,37 +29,6 @@ client.connect()
   .then(() => console.log('Connected to PostgreSQL database'))
   .catch(err => console.error('Error connecting to database:', err));
 
-// // Example query
-// client.query('SELECT NOW()', (err, res) => {
-//   if (err) {
-//     console.error('Error executing query:', err);
-//   } else {
-//     console.log('Current time:', res.rows[0].now);
-//   }
-//   client.end();
-// });
-
-
-
-
-
-
-
-
-
-// const client = new Client({
-//     user: 'postgres',
-//     password: 'Man-45663',
-//     host: 'localhost',
-//     port: 5432,
-//     database: 'mydb',
-//     ssl: {
-//         require: true,
-//         rejectUnauthorized: false,  // Bypass certificate verification if you don't have a local cert
-//       }
-// })
-// console.log('created Client object');
-
 
 const createTableQueryText = `
     CREATE TABLE IF NOT EXISTS testRecipes(
@@ -78,27 +47,6 @@ const addUrlConstraintQuery = `
     ALTER TABLE testRecipes
     ADD CONSTRAINT unique_url UNIQUE (url);`
 
-// try {
-//     await client.query(queryText);
-//     console.log('Table created successfully');
-// } catch (error) {
-//     console.error('Error creating table:', error);
-// }
-
-
-/*
-recipe {
-    title: string
-    description?: string
-    ingredients: map (ingredient (string): quantity (int))
-    time: string "Prep Time: __, Cook Time: __, Total Time: __"
-    servings: string "Servings: __"
-    rating: string "XX Stars From XX Ratings"
-    starCount: int  // sort recipe recommendations by starCount (highest to lowest)
-    steps: list of strings
-    htmlFile: response.data (to be displayed in the app?)
-}
-*/
 
 // 16623
 // google oauth
@@ -143,9 +91,6 @@ async function getRecipeAmericasTestKitchen() {
             let noRecipeElement = await page.$$('[class="errorPage_errorContent__0v4Lf"]');
             console.log(noRecipeElement.length);
             if (noRecipeElement.length > 0) continue;
-
-
-
 
             // title
             const titleElement = await page.$('h1');
@@ -331,8 +276,6 @@ function getRecipeRecommendations(ingredients, recipeCategory) {
 
 
 // some api stuff
-// const express = require('express');
-// const app = express();
 const port = 8080;
 const bodyParser = require('body-parser');
 
@@ -340,9 +283,9 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
 // Mock database interaction function (replace with your actual database query logic)
-const mockDatabase = [];
-const getUsers = () => mockDatabase;
-const addUser = (user) => mockDatabase.push(user);
+// const mockDatabase = [];
+// const getUsers = () => mockDatabase;
+// const addUser = (user) => mockDatabase.push(user);
 
 // Endpoint to retrieve users
 app.get('/api/users', (req, res) => {
@@ -362,7 +305,7 @@ app.listen(port, () => {
 });
 
 
-app.post('/api/search', (req, res) => {
+app.post('/api/search-recipes', (req, res) => {
     const searchPhrase = req.body;
     console.log(searchPhrase);
     res.status(200).json({message: `${searchPhrase} recipeee`});
@@ -374,17 +317,13 @@ app.post('/api/new-recipe', (req, res) => {
     res.status(200).json({message: 'new recipe added!'});
 })
 
-// app.post('/api/alena-test', (req, res) => {
-//     const reqBody = req.body;
-//     console.log(reqBody);
-//     res.status(200).json({message: 'hiii alena'});
-// })
-
-app.get('/api/alena-test', async (req, res) => {
-    let recipe = await client.query('SELECT * FROM testRecipes');
+app.post('/api/alena-test', async (req, res) => {
+    // let recipe = await client.query('SELECT * FROM testRecipes');
     // Accessing each row individually
-    let row = recipe.rows[0];
-    res.status(200).json({message:row})
+    // let row = recipe.rows[0];
+    const ingredients = req.body;
+    console.log(ingredients);
+    res.status(200).json({message:"hi"})
 })
 
 

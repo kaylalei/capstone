@@ -95,15 +95,15 @@ function NewRecipeForm() {
 
 
   // Fetch users from the backend
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/users');
-      const data = await response.json();
-      // setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  };
+  // const fetchUsers = async () => {
+  //   try {
+  //     const response = await fetch('http://localhost:8080/api/users');
+  //     const data = await response.json();
+  //     // setUsers(data);
+  //   } catch (error) {
+  //     console.error('Error fetching users:', error);
+  //   }
+  // };
 
   // Add a new user to the backend
   // const addUser = async () => {
@@ -122,13 +122,16 @@ function NewRecipeForm() {
   // };
 
   // Fetch users on component mount
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // useEffect(() => {
+  //   fetchUsers();
+  // }, []);
 
   return (
     <div>
       <h1>New Recipe</h1>
+
+      <h2>Recipe Category</h2>
+
       <h2>Title</h2>
       <OutlinedInput
         // id={index}

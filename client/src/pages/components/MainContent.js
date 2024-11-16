@@ -201,7 +201,6 @@ export function Search() {
         size="small"
         id="search"
         placeholder="Search recipes"
-        onChange={(e) => {}}
         sx={{ flexGrow: 1 }}
         startAdornment={
           <InputAdornment position="start" sx={{ color: 'text.primary' }}>
@@ -254,6 +253,31 @@ export default function MainContent() {
         break;
     }
   };
+
+  const searchForRecipes = async () => {
+    try {
+      // const newRecipe = {
+      //   title: title,
+      //   description: description,
+      //   imageUrl: imageUrl,
+      //   rating: rating,
+      //   timeAndServings: timeAndServings,
+      //   ingredients: ingredients,
+      //   steps: steps,
+      //   url: url
+      // };
+      // console.log(newRecipe);
+      const response = await fetch('http://localhost:8080/api/search-recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(searchText),
+      });
+      const data = await response.json();
+      console.log(data.message);
+    } catch (error) {
+      console.error('Error saving recipe in database: ', error);
+    }
+  }
 
 
 // these are the spices i have in my kitchen
@@ -362,7 +386,8 @@ export default function MainContent() {
             }}
           />
         </FormControl>
-            <Button size="small" color="info" variant="outlined">
+            <Button size="small" color="info" variant="outlined"
+            onClick={() => searchForRecipes()}>
               Search
             </Button>
         </Box>
