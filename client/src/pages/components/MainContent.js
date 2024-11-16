@@ -14,114 +14,121 @@ import { styled } from '@mui/material/styles';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import RssFeedRoundedIcon from '@mui/icons-material/RssFeedRounded';
 import { Star, StarHalf, StarBorder } from '@mui/icons-material';
+import Button from '@mui/material/Button';
 
 const breakfastCardData = [
   {
-    img: 'https://imagesvc.meredithcorp.io/v3/mm/image?url=https%3A%2F%2Fstatic.onecms.io%2Fwp-content%2Fuploads%2Fsites%2F43%2F2022%2F06%2F21%2F4518440-lemon-ricotta-pancakes-Chef-John-1x1-1.jpg&q=60&c=sc&poi=auto&orient=true&h=512',
-    tag: 'Breakfast',
-    title: "Lemon Ricotta Pancakes",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_Buttermilk_Blueberry_Pancakes_428_bnruvy',
+    tags: ['Main Courses', 'Fruit', 'Breakfast & Brunch'],
+    title: "Deluxe Blueberry Pancakes",
     description:
-      "If these lemon ricotta pancakes were any lighter, they would float off the plate! They are easy to make and delicious served with a pat of butter, lemon zest, and a drizzle of maple syrup.",
-    stars: 4.8,
-    ratings: 203
+      "Fresh fruit and a diner trick take the most beloved of flapjacks to the next level.",
+    stars: 4.5,
+    ratings: 121,
+    url: 'https://www.americastestkitchen.com/recipes/14903'
   },
   {
-    img: 'https://www.allrecipes.com/thmb/Q9tSLO44euYUv960CoO_bb2tD4Y=/0x512/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/AR-24148-easy-broccoli-quiche-beauty-4x3-e73d1f8a3a7c466f86f8b6cf33e76050.jpg',
-    tag: 'Breakfast',
-    title: "Easy Broccoli Quiche",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/35610_sfs-quiche-with-leeks-and-goat-cheese-014',
+    tags: ['Main Courses', 'Europe', 'French', 'Fruits & Vegetables', 'Eggs & Dairy', 'Vegetables', 'Eggs', 'Cheese', 'Vegetarian', 'Breakfast & Brunch', 'Savory Pies & Tarts'],
+    title: "Leek and Goat Cheese Quiche",
     description:
-      "This broccoli quiche is vegetarian and a snap to make with your favorite crust. It looks great on any buffet table.",
-    stars: 4.4,
-    ratings: 1495
+      "By using the proper combination of heavy cream, milk, whole eggs, and egg yolks, you can produce a custard that makes quiche worth eating once again.",
+    stars: 4.5,
+    ratings: 100,
+    url: 'https://www.americastestkitchen.com/recipes/1335'
   },
 ];
 
 const lunchCardData = [
   {
-    img: 'https://imagesvc.meredithcorp.io/v3/mm/image?url=https%3A%2F%2Fstatic.onecms.io%2Fwp-content%2Fuploads%2Fsites%2F43%2F2020%2F06%2F19%2FSuper-Delicious-Zuppa-Toscana.jpeg&q=60&c=sc&poi=auto&orient=true&h=512',
-    tag: 'Lunch',
-    title: "Super-Delicious Zuppa Toscana",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/1337_cvr-sfs-bstchixdumpsup-col0018-article',
+    tags: ['Main Courses', 'US & Canada', 'American', 'Southern', 'Poultry', 'Chicken', 'Stews'],
+    title: "Chicken and Dumplings",
     description:
-      "Zuppa Toscana is oh-so-good! This recipe has just the right amount of spice to keep you coming back for more!",
-    stars: 4.8,
-    ratings: 3568
+      "Our goal was to develop a dumpling that was light, substantial, tender, and durable. We also wanted to make a complete meal in one dish.",
+    stars: 4,
+    ratings: 193
   },
   {
-    img: 'https://www.allrecipes.com/thmb/sKoeSuJsr2A47e-q0P5bVqGDTzg=/0x512/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/47717-reuben-sandwich-ddmfs-hero-3x4-0624-88eae0b6357843b593b4f03f7debc7e1.jpg',
-    tag: 'Lunch',
-    title: "Reuben Sandwich",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_QuesabirriaTacos-102_mdfc7i',
+    tags: ['Main Courses', 'Latin America & Caribbean', 'Mexican', 'Fruits & Vegetables', 'Meat', 'Vegetables', 'Beef'],
+    title: "Quesabirria Tacos",
     description:
-      "A Reuben sandwich is one of my family's fix-it-quick favorites. They are really delicious and easy to make. I like to serve them with big bowls of steaming vegetable soup and dill pickles on the side.",
-    stars: 4.7,
-    ratings: 704
+      "A Tucson original with its own spin.",
+    stars: 4,
+    ratings: 260,
+    url: 'https://www.americastestkitchen.com/recipes/15407'
   },
 ];
 
 const dinnerCardData = [
   {
-    img: 'https://www.allrecipes.com/thmb/wj4a78k4z3GFayT_PrGqU51aCKs=/0x512/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/242352-greek-lemon-chicken-and-potatoes-DDMFS-4x3-6111-76a4d0f07389450ca6d559113574076e.jpg',
-    tag: 'Dinner',
-    title: "Greek Lemon Chicken and Potatoes",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/43960-sfs-indian-butter-chicken-for-two-35-1',
+    tags: ['Main Courses', 'Asia', 'Indian', 'Poultry', 'Chicken'],
+    title: "Murgh Makhani (Indian Butter Chicken)",
     description:
-      "This Greek lemon chicken dish with garlic and herb roast potatoes is a classic recipe and easy to cook in one roasting pan. The lemony crispy chicken is a proven crowd-pleaser, easy on the wallet, and a favorite of mine.",
-    stars: 4.8,
-    ratings: 1346
+      "Of course it should be rich and creamy. But for a version of this restaurant classic that’s vibrant and complex, there’s more to consider than the namesake ingredient.",
+    stars: 4.5,
+    ratings: 1052,
+    url: 'https://www.americastestkitchen.com/recipes/11519'
   },
   {
-    img: 'https://www.allrecipes.com/thmb/dmajq6rh5MZUlrpgu7wO0AFr6sk=/0x512/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/14759-pork-dumplings-DDMFS-4x3-f87c9459ec73475f9dcab4cc651c46d3.jpg',
-    tag: 'Dinner',
-    title: "Pork Dumplings",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_SalmonPiccata_37_xwji2y',
+    tags: ['Main Courses', 'Italian', 'Fish & Seafood', 'Weeknight'],
+    title: "Salmon Piccata",
     description:
-      "These tasty steamed pork dumplings make a perfect appetizer for a party or you can serve them as a main dish.  Serve with hoisin sauce, hot Chinese-style mustard, and toasted sesame seeds.",
-    stars: 4.6,
-    ratings: 385
+      "This classic savory sauce takes salmon in a fresh new direction.",
+    stars: 4,
+    ratings: 341,
+    url: 'https://www.americastestkitchen.com/recipes/13772'
   },
 ];
 
 const dessertCardData = [
   {
-    img: 'https://www.allrecipes.com/thmb/uVIfnzDWQ9WxRTshzoy9IbrVjyg=/0x512/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/52547-Triple-Berry-Crisp-DDMFS-3x4-9c9c40ae0762443d92163d16f5397476.jpg',
-    tag: 'Dessert',
-    title: "Triple Berry Crisp",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/22419_sfs-french-apple-tart-15',
+    tags: ['Desserts or Baked Goods', 'Fruit', 'Make Ahead', 'Fruit Desserts', 'Tarts'],
+    title: "French Apple Tart",
     description:
-      "This berry crisp recipe is made with a triple berry mixture of raspberries, blackberries, and blueberries. It's a very pretty dessert and tastes fantastic. My family loves it! Delicious served warm with whipped cream.",
-    stars: 4.7,
-    ratings: 1325
+      "Classic form and good looks are compulsory for a holiday centerpiece, but they don’t matter if the dessert falls apart when you serve it. We wanted integrity with the beauty.",
+    stars: 4.5,
+    ratings: 89,
+    url: 'https://www.americastestkitchen.com/recipes/8114'
   },
   {
-    img: 'https://www.allrecipes.com/thmb/3vyKrtDL_9lFvNqcnV1Ra1xngjk=/0x512/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/17377-chocolate-cupcakes-DDMFS-4x3-622a7a66fcd84692947794ed385dc991.jpg',
-    tag: 'Dessert',
-    title: "Chocolate Cupcakes",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_Millionaire_Shortbread_418_1_fi4esc',
+    tags: ['Desserts or Baked Goods', 'Great Britain', 'Chocolate', 'Make Ahead', 'Brownies & Bars'],
+    title: "Millionaire's Shortbread",
     description:
-      "Chocolate cupcakes are the ultimate party food. These are super moist and bursting with rich, chocolaty flavor — and they're so easy to make. Frost these delicious chocolate cupcakes with buttercream or cream cheese frosting, or try royal icing or even whipped cream.",
-    stars: 4.1,
-    ratings: 1561
+      "Britain’s triple-decker combo of buttery cookie, sweet caramel, and dark chocolate makes a perfect holiday gift. But only if every layer is flawless.",
+    stars: 4.5,
+    ratings: 562,
+    url: 'https://www.americastestkitchen.com/recipes/9253'
   },
 ];
 
 
 
-
-
-
 const allCategoryCardData = [
   {
-    img: 'https://www.allrecipes.com/thmb/GvI7NxsOoNqbP52MM8bsaTWFUSE=/0x512/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/76594-grandmothers-buttermilk-cornbread-beauty-3x4-0135064414801604-dd84dcaf1d0f421eb3b6fdced8cf0ad3.jpg',
-    tag: 'Dessert',
-    title: "Grandmother's Buttermilk Cornbread",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_SouthernStyleCastIronSkilletCornbread-28_fhvwze',
+    tags: ['Main Courses', 'Grains', 'Quick Breads'],
+    title: "Southern-Style Buttermilk Cornbread",
     description:
-      "The best cornbread recipe is my grandmother's, and this is it — sweet and moist!",
-    stars: 4.8,
-    ratings: 7508
+      "Cornbread is not hard to make, but a little care and attention to detail will get you better results.",
+    stars: 4.5,
+    ratings: 2,
+    url: 'https://www.americastestkitchen.com/recipes/16619'
   },
   {
-    img: 'https://www.allrecipes.com/thmb/iOfxQGOJTdM0K6edW-MFkn-nydE=/0x512/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/23600-worlds-best-lasagna-DDMFS-4x3-1196-24c5401652934ffb96d3d94bc9fbe2d7.jpg',
-    tag: 'Dinner',
-    title: "World's Best Lasagna",
+    img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_Steak_Tips_with_Pumpkin_Risotto-22919_wfokok',
+    tags: ['Main Courses', 'Vegetables', 'Rice', 'Beef', 'Weeknight'],
+    title: "Steak Tips with Pumpkin Risotto",
     description:
-      "This lasagna recipe takes a little work, but it is so satisfying and filling that it's worth it!",
-    stars: 4.8,
-    ratings: 20691
+      "Canned pumpkin adds flavor and color to this fall dinner.",
+    stars: 4,
+    ratings: 82,
+    url: 'https://www.americastestkitchen.com/recipes/16505'
   },
 ];
 
@@ -162,7 +169,6 @@ const StyledTypography = styled(Typography)({
 });
 
 function getStarComponent(starType) {
-  console.log(starType)
   if (starType === "empty") return <StarBorder/>;
   if (starType === "half") return <StarHalf/>;
   return <Star/>;
@@ -171,14 +177,12 @@ function getStarComponent(starType) {
 function Stars({ starCount, ratings }) {
   let stars = starCount
   let starIcons = [];
-  while (starCount > 0) {
-    console.log(starCount)
+  for (let i = 0; i < 5; i++) {
     if (starCount <= 0) starIcons.push("empty");
     else if (starCount < 0.5) starIcons.push("half");
     else starIcons.push("full");
     starCount -= 1;
   }
-  console.log(starIcons)
 
   return (
     <span>
@@ -197,6 +201,7 @@ export function Search() {
         size="small"
         id="search"
         placeholder="Search recipes"
+        onChange={(e) => {}}
         sx={{ flexGrow: 1 }}
         startAdornment={
           <InputAdornment position="start" sx={{ color: 'text.primary' }}>
@@ -214,7 +219,8 @@ export function Search() {
 export default function MainContent() {
   const [focusedCardIndex, setFocusedCardIndex] = React.useState(null);
   const [cardData, setCardData] = React.useState(allCategoryCardData);
-  const [cardCategory, setCardCategory] = React.useState("all categories")
+  const [cardCategory, setCardCategory] = React.useState("all categories");
+  const [searchText, setSearchText] = React.useState("");
 
   const handleFocus = (index) => {
     setFocusedCardIndex(index);
@@ -242,12 +248,16 @@ export default function MainContent() {
         setCardData(dessertCardData);
         setCardCategory("dessert");
         break;
-      case "all categories":
+      default:
         setCardData(allCategoryCardData);
         setCardCategory("all categories");
         break;
     }
   };
+
+
+// these are the spices i have in my kitchen
+
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -260,10 +270,6 @@ export default function MainContent() {
           overflow: 'auto',
         }}
       >
-        <Search />
-        <IconButton size="small" aria-label="RSS feed">
-          <RssFeedRoundedIcon />
-        </IconButton>
       </Box>
       <Box
         sx={{
@@ -338,10 +344,27 @@ export default function MainContent() {
             overflow: 'auto',
           }}
         >
-          <Search />
-          <IconButton size="small" aria-label="RSS feed">
-            <RssFeedRoundedIcon />
-          </IconButton>
+        <FormControl sx={{ width: { xs: '100%', md: '25ch' } }} variant="outlined">
+          <OutlinedInput
+            size="small"
+            id="search"
+            placeholder="Search recipes"
+            value={searchText}
+            onChange={(e) => {setSearchText(e.target.value); console.log(searchText)}}
+            sx={{ flexGrow: 1 }}
+            startAdornment={
+              <InputAdornment position="start" sx={{ color: 'text.primary' }}>
+                <SearchRoundedIcon fontSize="small" />
+              </InputAdornment>
+            }
+            inputProps={{
+              'aria-label': 'search',
+            }}
+          />
+        </FormControl>
+            <Button size="small" color="info" variant="outlined">
+              Search
+            </Button>
         </Box>
       </Box>
       <Grid container spacing={2} columns={12}>
@@ -364,9 +387,42 @@ export default function MainContent() {
               }}
             />
             <SyledCardContent>
-              <Typography gutterBottom variant="caption" component="div">
-                {cardData[0].tag}
-              </Typography>
+
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  flexDirection: 'row',
+                  gap: 3,
+                  overflow: 'auto',
+                }}
+              >
+                {cardData[0].tags.map((tag) => (
+                  <Chip
+                    size="medium" 
+                    label={tag}
+                    sx={{
+                      backgroundColor: 'light gray'
+                    }} />
+                ))}
+              </Box>
+
               <Typography gutterBottom variant="h6" component="div">
                 {cardData[0].title}
               </Typography>
@@ -397,9 +453,23 @@ export default function MainContent() {
               }}
             />
             <SyledCardContent>
-              <Typography gutterBottom variant="caption" component="div">
-                {cardData[1].tag}
-              </Typography>
+            <Box
+              sx={{
+                display: 'inline-flex',
+                flexDirection: 'row',
+                gap: 3,
+                overflow: 'auto',
+              }}
+            >
+              {cardData[0].tags.map((tag) => (
+                <Chip
+                  size="medium" 
+                  label={tag}
+                  sx={{
+                    backgroundColor: 'light gray'
+                  }} />
+              ))}
+            </Box>
               <Typography gutterBottom variant="h6" component="div">
                 {cardData[1].title}
               </Typography>
