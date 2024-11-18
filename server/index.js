@@ -6,7 +6,10 @@ const { Client } = require('pg');
 const puppeteer = require('puppeteer');
 const cors = require('cors');
 
-app.use(cors({ origin: 'http://localhost:3000' })); // Replace with your frontend URL
+// app.use(cors({ origin: 'http://localhost:3000' })); // Replace with your frontend URL
+
+app.use(cors({ origin: 'http://172.26.0.79:3000/' }))
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -17,18 +20,40 @@ app.get('/', (req, res) => {
 // });
 
 
+// const client = new Client({
+//   user: 'heychef',
+//   host: 'localhost',
+//   database: 'heychefdb',
+//   password: 'heychefdbpassword',
+//   port: 5432, // Default PostgreSQL port
+// });
+
 const client = new Client({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'mydb',
-  password: 'Man-45663',
-  port: 5432, // Default PostgreSQL port
-});
+    user: 'postgres',
+    host: 'localhost',
+    database: 'mydb',
+    password: 'Man-45663',
+    port: 5432, // Default PostgreSQL port
+  });
 
 client.connect()
   .then(() => console.log('Connected to PostgreSQL database'))
   .catch(err => console.error('Error connecting to database:', err));
 
+
+// const createTableQueryText = `
+//     CREATE TABLE IF NOT EXISTS ${category}(
+//     title TEXT,
+//     tags TEXT [],
+//     description TEXT,
+//     imageUrl TEXT,
+//     rating TEXT,
+//     ratingCount TEXT,
+//     timeAndServings TEXT,
+//     ingredients TEXT [],
+//     steps TEXT [],
+//     url TEXT
+//     );`;
 
 const createTableQueryText = `
     CREATE TABLE IF NOT EXISTS testRecipes(
@@ -54,11 +79,36 @@ const addUrlConstraintQuery = `
 
 async function getRecipeAmericasTestKitchen() {
     try {
-        await client.query('DROP TABLE testRecipes');
+        // await client.query('DROP TABLE IF EXISTS testRecipes');
         // create table
-        await client.query(createTableQueryText);
-        await client.query(addUrlConstraintQuery);
-        console.log('Table created successfully');
+        // await client.query(createTableQueryText);
+        // await client.query(addUrlConstraintQuery);
+        // console.log('Table created successfully');
+
+        for (let category of ['breakfast', 'lunch', 'dinner', 'dessert']) {
+            // console.log(category)
+            // await client.query(`DROP TABLE ${category}`);
+            await client.query(
+                `CREATE TABLE IF NOT EXISTS ${category}(
+                    title TEXT,
+                    tags TEXT [],
+                    description TEXT,
+                    imageUrl TEXT,
+                    rating TEXT,
+                    ratingCount TEXT,
+                    timeAndServings TEXT,
+                    ingredients TEXT [],
+                    steps TEXT [],
+                    url TEXT
+                    );`
+            )
+            // await client.query(
+            //     `ALTER TABLE ${category}
+            //     ADD CONSTRAINT unique_url UNIQUE (url);`
+            // );
+
+            // await client.query(`ALTER TABLE ${category} DROP CONSTRAINT IF EXISTS unique_url`)
+        }
 
 
 
@@ -82,15 +132,15 @@ async function getRecipeAmericasTestKitchen() {
         // 2295
         // let recipeNums = [2295, 16489, 14903] // all good
         let recipeNums = [16624, 16489, 8114];
-        for (let i of recipeNums) {
-        // for (let i = 2295; i < 2296; i++) {
+        // for (let i of recipeNums) {
+        for (let i = 1; i < 4; i++) {
             const recipeUrl = `https://www.americastestkitchen.com/recipes/${i}`;
-            console.log(recipeUrl)
+            // console.log(recipeUrl)
             await page.goto(recipeUrl);
 
             // don't scrape if this is not a valid recipe url
             let noRecipeElement = await page.$$('[class="errorPage_errorContent__0v4Lf"]');
-            console.log(noRecipeElement.length);
+            // console.log(noRecipeElement.length);
             if (noRecipeElement.length > 0) continue;
 
             // title
@@ -102,13 +152,13 @@ async function getRecipeAmericasTestKitchen() {
             const ratingElement = await page.$('#recipe-header-rating-score');
             if (ratingElement) rating = await page.evaluate(ratingElement => ratingElement.textContent, ratingElement);
             else rating = "Not rated";
-            if (ratingElement) console.log('Rating:', rating);
+            // if (ratingElement) console.log('Rating:', rating);
 
             // rating count
             const ratingCountElement = await page.$('#recipe-header-rating-count');
             if (ratingCountElement) ratingCount = await page.evaluate(ratingCountElement => ratingCountElement.textContent.slice(1, -1), ratingCountElement);
             else ratingCount = "no ratings";
-            console.log('Rating count:', ratingCount);
+            // console.log('Rating count:', ratingCount);
 
             // tags
             const tags = [];
@@ -117,12 +167,12 @@ async function getRecipeAmericasTestKitchen() {
                 const tag = await page.evaluate(tagElement => tagElement.textContent, tagElement);
                 tags.push(tag);
             }
-            console.log(tags);
+            // console.log(tags);
 
             // description
             const descriptionElement = await page.$('[class="typography RecipePageHeader_description__1Xwwc typography-module_base__PkumT typography-module_open-xlg__MHo6f typography-module_proxima__HDZ4V"]');
             const description = await page.evaluate(descriptionElement => descriptionElement.textContent, descriptionElement);
-            console.log(description);
+            // console.log(description);
 
             // servings and / or time
             let timeAndServings = "";
@@ -140,7 +190,7 @@ async function getRecipeAmericasTestKitchen() {
                 if (timeAndServings) timeAndServings += `\n${spec}`;
                 else timeAndServings = `${spec}`;
             }
-            console.log(timeAndServings);
+            // console.log(timeAndServings);
 
 
             // image url
@@ -153,7 +203,7 @@ async function getRecipeAmericasTestKitchen() {
                     break;
                 }
             }
-            console.log(imageUrl);
+            // console.log(imageUrl);
 
             // ingredients
             const ingredientElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-lg__b6RLE typography-module_proxima__HDZ4V"]');
@@ -164,7 +214,7 @@ async function getRecipeAmericasTestKitchen() {
                 if (!ingredientString.includes(ingredient)) ingredients.push(ingredient);
                 ingredientString += ingredient;
             }
-            console.log(ingredients)
+            // console.log(ingredients)
 
             // steps
             let stepElements = await page.$$('[class="typography typography-module_base__PkumT typography-module_open-lg__b6RLE typography-module_proxima__HDZ4V typography-module_dangerouslySet__S4r6M"]');
@@ -175,7 +225,7 @@ async function getRecipeAmericasTestKitchen() {
                 let splitByPeriod = stepText.trim().split(". ");
                 steps = [...steps, ...splitByPeriod];
             }
-            console.log(steps);
+            // console.log(steps);
 
 
             /*
@@ -183,6 +233,12 @@ async function getRecipeAmericasTestKitchen() {
             dessert recipes -> Desserts or Baked Goods
             lunch and dinner recipes -> everything else
             */
+           let recipeCategories = [];
+           if (tags.includes('Breakfast & Brunch')) {
+            recipeCategories = ['breakfast'];
+           } else if (tags.includes('Desserts or Baked Goods')) {
+            recipeCategories = ['dessert'];
+            } else recipeCategories = ['lunch', 'dinner'];
 
             // CREATE TABLE IF NOT EXISTS testRecipes(
             //     title TEXT,
@@ -194,12 +250,27 @@ async function getRecipeAmericasTestKitchen() {
             //     steps TEXT [],
             //     url TEXT
             //     );`;
-            let insertQueryText = `
-                INSERT INTO testRecipes(title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                ON CONFLICT (url) DO NOTHING`;
+            // let insertQueryText = `
+            //     INSERT INTO testRecipes(title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
+            //     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            //     ON CONFLICT (url) DO NOTHING`;
 
-            client.query(insertQueryText, [title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, recipeUrl]);
+            // client.query(insertQueryText, [title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, recipeUrl]);
+
+
+            for (let recipeCategory of recipeCategories) {
+                let recipeVars = [title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, recipeUrl];
+                client.query(
+                    `INSERT INTO ${recipeCategory}(title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, recipeVars
+                    // ON CONFLICT (url) DO NOTHING`, recipeVars
+                )
+            }
+            // console.log(recipeCategories)
+            // let r = await client.query(`SELECT * FROM ${recipeCategories[0]}`);
+            // console.log(r.rows);
+
+
 
             // console.log(recipeData);
 
@@ -222,20 +293,20 @@ async function getRecipeAmericasTestKitchen() {
 
 
         }
-        console.log("select all from testRecipes table")
-        let res = await client.query('SELECT * FROM testRecipes');
-        console.log(res.rowCount)
-        // Accessing each row individually
-        let row1 = res.rows[0];
-        const row2 = res.rows[1];
-        const row3 = res.rows[2];
+        // console.log("select all from testRecipes table")
+        // let res = await client.query('SELECT * FROM testRecipes');
+        // console.log(res.rowCount)
+        // // Accessing each row individually
+        // let row1 = res.rows[0];
+        // const row2 = res.rows[1];
+        // const row3 = res.rows[2];
 
-        // Displaying each row (object) individually
-        console.log(row1); // First object
-        console.log(row2); // Second object
-        console.log(row3); // Third object
+        // // Displaying each row (object) individually
+        // console.log(row1); // First object
+        // console.log(row2); // Second object
+        // console.log(row3); // Third object
 
-        await client.end();
+        // await client.end();
         console.log("closing browser");
         await browser.close();
     } catch (error) {
@@ -243,7 +314,7 @@ async function getRecipeAmericasTestKitchen() {
     }
 }
 
-// getRecipeAmericasTestKitchen()
+getRecipeAmericasTestKitchen()
 
 
 /*
@@ -252,24 +323,40 @@ async function getRecipeAmericasTestKitchen() {
     - if you get through all ingredients in the recipe and you have all of them, we chillin
 */
 
-function getRecipeRecommendations(ingredients, recipeCategory) {
-    /* some database query or api call to get recipes from the specified category */
-    let recipes; /* all the recipes retrieved from the database */
-    let recipeRecommendations = [];
-    
-    for (recipe of recipes) {
-        let recipeIngredients = []; /* the ingredients list for the recipe - list of strings */
-        let numMatchingIngredients = 0;
+async function getRecipeRecommendations(ingredients, recipeCategory) {
+    try {
+        /* some database query or api call to get recipes from the specified category */
+        // console.log("select all from testRecipes table")
+        let recipes = await client.query(`SELECT * FROM ${recipeCategory}`);
+        // console.log(res.rowCount)
+        // Accessing each row individually
+        // let row1 = res.rows[0];
+        // const row2 = res.rows[1];
+        // const row3 = res.rows[2];
 
-        for (ingredient of ingredients) {
-            for (recipeIngredient of recipeIngredients) {
-                if (recipeIngredient.includes(ingredient)) {
-                    numMatchingIngredients += 1;
-                    break;
+        // // Displaying each row (object) individually
+        // console.log(row1); // First object
+        // console.log(row2); // Second object
+        // console.log(row3); // Third object
+
+        let recipeRecommendations = [];
+        
+        for (recipe of recipes.rows) {
+            let recipeIngredients = []; /* the ingredients list for the recipe - list of strings */
+            let numMatchingIngredients = 0;
+
+            for (ingredient of ingredients) {
+                for (recipeIngredient of recipeIngredients) {
+                    if (recipeIngredient.includes(ingredient)) {
+                        numMatchingIngredients += 1;
+                        break;
+                }
+                }
+            if (numMatchingIngredients == recipeIngredients.length) recipeRecommendations.push(recipe);
             }
-            }
-        if (numMatchingIngredients == recipeIngredients.length) recipeRecommendations.push(recipe);
         }
+    } catch (error) {
+        console.log(error)
     }
 }
 
@@ -319,6 +406,23 @@ app.post('/api/search-recipes', async (req, res) => {
         WHERE ingredient ILIKE '%${searchPhrase.searchText}%'
     );`;
 
+    let results = [];
+
+    for (let category of ['breakfast', 'lunch', 'dessert']) {
+        let recipes = await client.query(
+            `SELECT *
+            FROM ${category}
+            WHERE EXISTS (
+            SELECT 1
+            FROM unnest(ingredients) AS ingredient
+            WHERE ingredient ILIKE '%${searchPhrase.searchText}%'`
+        )
+        results = [...results, ...recipes.rows];
+    }
+
+    res.status(200).json({message: results});
+
+
     // do this select on each of the four tables
     // combine the results into one list
     // [...breakfastRecs, ...lunchRecs, ...dinnerRecs, ...dessertRecs]
@@ -327,13 +431,13 @@ app.post('/api/search-recipes', async (req, res) => {
     // new Set(...): Creates a new Set from the array of strings, automatically removing duplicates.
     // Array.from(...): Converts the Set back to an array.
 
-    let recipeRecs = await client.query(selectQueryText);
-    console.log(recipeRecs.rowCount)
-    // Accessing each row individually
+    // let recipeRecs = await client.query(selectQueryText);
+    // console.log(recipeRecs.rowCount)
+    // // Accessing each row individually
 
-    for (let recipe of recipeRecs.rows) {
-        console.log(recipe);
-    }
+    // for (let recipe of recipeRecs.rows) {
+    //     console.log(recipe);
+    // }
 
     // let row1 = res.rows[0];
     // const row2 = res.rows[1];
@@ -345,7 +449,7 @@ app.post('/api/search-recipes', async (req, res) => {
     // console.log(row3); // Third object
 
 
-    res.status(200).json({message: recipeRecs.rows});
+    // res.status(200).json({message: recipeRecs.rows});
 });
 
 app.post('/api/new-recipe', (req, res) => {
@@ -362,7 +466,11 @@ app.post('/api/new-recipe', (req, res) => {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         ON CONFLICT (url) DO NOTHING`;
 
-    client.query(insertQueryText, [newRecipe.title, newRecipe.tags, newRecipe.description, newRecipe.imageUrl, newRecipe.rating, newRecipe.ratingCount, newRecipe.timeAndServings, newRecipe.ingredients, newRecipe.steps, newRecipe.recipeUrl]);
+    client.query( 
+        `INSERT INTO ${category}(title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        
+        [newRecipe.title, newRecipe.tags, newRecipe.description, newRecipe.imageUrl, newRecipe.rating, newRecipe.ratingCount, newRecipe.timeAndServings, newRecipe.ingredients, newRecipe.steps, newRecipe.recipeUrl]);
 
     console.log(newRecipe);
     res.status(200).json({message: 'new recipe added!'});
@@ -372,9 +480,15 @@ app.post('/api/alena-test', async (req, res) => {
     // let recipe = await client.query('SELECT * FROM testRecipes');
     // Accessing each row individually
     // let row = recipe.rows[0];
-    const ingredients = req.body;
-    console.log(ingredients);
-    res.status(200).json({message:"hi"})
+    const request = req.body;
+    let category = request.category;
+    let ingredients = request.ingredients;
+
+    let recs = await getRecipeRecommendations(ingredients, category);
+
+
+    // console.log(ingredients);
+    res.status(200).json({message:recs})
 })
 
 
