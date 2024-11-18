@@ -220,6 +220,7 @@ export default function MainContent() {
   const [cardData, setCardData] = React.useState(allCategoryCardData);
   const [cardCategory, setCardCategory] = React.useState("all categories");
   const [searchText, setSearchText] = React.useState("");
+  const searchResults = [];
 
   const handleFocus = (index) => {
     setFocusedCardIndex(index);
@@ -256,24 +257,65 @@ export default function MainContent() {
 
   const searchForRecipes = async () => {
     try {
-      // const newRecipe = {
-      //   title: title,
-      //   description: description,
-      //   imageUrl: imageUrl,
-      //   rating: rating,
-      //   timeAndServings: timeAndServings,
-      //   ingredients: ingredients,
-      //   steps: steps,
-      //   url: url
-      // };
-      // console.log(newRecipe);
+      const searchPhrase = {
+          searchText: searchText
+      };
       const response = await fetch('http://localhost:8080/api/search-recipes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(searchText),
+        body: JSON.stringify(searchPhrase),
       });
       const data = await response.json();
       console.log(data.message);
+
+
+
+
+
+
+      // {
+      //   img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_Steak_Tips_with_Pumpkin_Risotto-22919_wfokok',
+      //   tags: ['Main Courses', 'Vegetables', 'Rice', 'Beef', 'Weeknight'],
+      //   title: "Steak Tips with Pumpkin Risotto",
+      //   description:
+      //     "Canned pumpkin adds flavor and color to this fall dinner.",
+      //   stars: 4,
+      //   ratings: 82,
+      //   url: 'https://www.americastestkitchen.com/recipes/16505'
+      // },
+
+      // title TEXT,
+      // description TEXT,
+      // imageUrl TEXT,
+      // rating TEXT,
+      // ratingCount TEXT,
+      // timeAndServings TEXT,
+      // ingredients TEXT [],
+      // steps TEXT [],
+      // url TEXT
+
+      let recipes = data.message;
+
+      let searchResults = [];
+      for (let recipe of recipes) {
+        console.log(typeof recipe, recipe);
+        let recipeCard = {
+          img: recipe.imageurl,
+          tags: recipe.tags,
+          title: recipe.title,
+          description: recipe.description,
+          stars: recipe.rating,
+          ratings: recipe.ratingcount,
+          url: recipe.url
+        }
+        searchResults.push(recipeCard);
+      }
+      console.log(searchResults);
+
+      setCardData(searchResults);
+      setCardCategory("search");
+
+
     } catch (error) {
       console.error('Error saving recipe in database: ', error);
     }

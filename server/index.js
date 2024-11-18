@@ -33,6 +33,7 @@ client.connect()
 const createTableQueryText = `
     CREATE TABLE IF NOT EXISTS testRecipes(
     title TEXT,
+    tags TEXT [],
     description TEXT,
     imageUrl TEXT,
     rating TEXT,
@@ -53,10 +54,10 @@ const addUrlConstraintQuery = `
 
 async function getRecipeAmericasTestKitchen() {
     try {
-
+        await client.query('DROP TABLE testRecipes');
         // create table
         await client.query(createTableQueryText);
-        // await client.query(addUrlConstraintQuery);
+        await client.query(addUrlConstraintQuery);
         console.log('Table created successfully');
 
 
@@ -194,11 +195,11 @@ async function getRecipeAmericasTestKitchen() {
             //     url TEXT
             //     );`;
             let insertQueryText = `
-                INSERT INTO testRecipes(title, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                INSERT INTO testRecipes(title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                 ON CONFLICT (url) DO NOTHING`;
 
-            client.query(insertQueryText, [title, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, recipeUrl]);
+            client.query(insertQueryText, [title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, recipeUrl]);
 
             // console.log(recipeData);
 
@@ -305,14 +306,64 @@ app.listen(port, () => {
 });
 
 
-app.post('/api/search-recipes', (req, res) => {
+app.post('/api/search-recipes', async (req, res) => {
     const searchPhrase = req.body;
     console.log(searchPhrase);
-    res.status(200).json({message: `${searchPhrase} recipeee`});
+
+    const selectQueryText = `
+        SELECT *
+        FROM testRecipes
+        WHERE EXISTS (
+        SELECT 1
+        FROM unnest(ingredients) AS ingredient
+        WHERE ingredient ILIKE '%${searchPhrase.searchText}%'
+    );`;
+
+    // do this select on each of the four tables
+    // combine the results into one list
+    // [...breakfastRecs, ...lunchRecs, ...dinnerRecs, ...dessertRecs]
+
+    // remove duplicates
+    // new Set(...): Creates a new Set from the array of strings, automatically removing duplicates.
+    // Array.from(...): Converts the Set back to an array.
+
+    let recipeRecs = await client.query(selectQueryText);
+    console.log(recipeRecs.rowCount)
+    // Accessing each row individually
+
+    for (let recipe of recipeRecs.rows) {
+        console.log(recipe);
+    }
+
+    // let row1 = res.rows[0];
+    // const row2 = res.rows[1];
+    // const row3 = res.rows[2];
+
+    // // Displaying each row (object) individually
+    // console.log(row1); // First object
+    // console.log(row2); // Second object
+    // console.log(row3); // Third object
+
+
+    res.status(200).json({message: recipeRecs.rows});
 });
 
 app.post('/api/new-recipe', (req, res) => {
     const newRecipe = req.body;
+    let category = newRecipe.category;
+
+    // let insertQueryText = `
+    //     INSERT INTO ${category}(title, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
+    //     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    //     ON CONFLICT (url) DO NOTHING`;
+
+    let insertQueryText = `
+        INSERT INTO testRecipes(title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        ON CONFLICT (url) DO NOTHING`;
+
+    client.query(insertQueryText, [newRecipe.title, newRecipe.tags, newRecipe.description, newRecipe.imageUrl, newRecipe.rating, newRecipe.ratingCount, newRecipe.timeAndServings, newRecipe.ingredients, newRecipe.steps, newRecipe.recipeUrl]);
+
     console.log(newRecipe);
     res.status(200).json({message: 'new recipe added!'});
 })

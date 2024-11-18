@@ -6,6 +6,7 @@ import NavBar from './components/NavBar.js';
 import AppTheme from '../theme/AppTheme.js';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Button from '@mui/material/Button';
+import { Select, MenuItem } from '@mui/material';
 
 export default function NewRecipe(props) {
   return (
@@ -54,7 +55,9 @@ export default function NewRecipe(props) {
 
 
 function NewRecipeForm() {
+  const [recipeCategory, setRecipeCategory] = useState("");
   const [title, setTitle] = useState("");
+  const [tags, setTags] = useState([""]);
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [rating, setRating] = useState("");
@@ -67,6 +70,7 @@ function NewRecipeForm() {
   const saveRecipeInDatabase = async () => {
     try {
       const newRecipe = {
+        category: recipeCategory,
         title: title,
         description: description,
         imageUrl: imageUrl,
@@ -131,6 +135,18 @@ function NewRecipeForm() {
       <h1>New Recipe</h1>
 
       <h2>Recipe Category</h2>
+      <Select
+        labelId="demo-simple-select-label"
+        id="demo-simple-select"
+        value={recipeCategory}
+        label="Recipe category"
+        onChange={(e) => {setRecipeCategory(e.target.value)}}
+      >
+        <MenuItem value={"Breakfast"}>Breakfast</MenuItem>
+        <MenuItem value={"Lunch"}>Lunch</MenuItem>
+        <MenuItem value={"Dinner"}>Dinner</MenuItem>
+        <MenuItem value={"Dessert"}>Dessert</MenuItem>
+      </Select>
 
       <h2>Title</h2>
       <OutlinedInput
@@ -145,6 +161,47 @@ function NewRecipeForm() {
           width: '100%'
         }}
       />
+
+      <h2>Tags (Optional)</h2>
+      {tags.map((tag, index) => (
+        <div>
+          <OutlinedInput
+            id={index}
+            type="text"
+            placeholder="Recipe tag"
+            value={tag}
+            // onChange={(e) => setIngredients({ ...ingredients, name: e.target.value })}
+            // onChange={(e) => setIngredients([...ingredients, e.target.value])}
+            onChange={(e) => {let newTags = [...tags];
+                              console.log(e.target.id, e.target.value)
+                              newTags[e.target.id] = e.target.value;
+                              console.log(newTags)
+                              setTags(newTags)
+            }}
+            sx={{
+              width: '91%'
+            }}
+          />
+          <Button variant="contained" color="primary" size="small"
+            // href={index}
+            onClick={() => {let newTags = [...tags];
+                            if (newTags.length > 1) newTags.splice(index, 1);
+                            setTags(newTags);
+
+            }}>
+            <b>Remove Tag</b>
+          </Button>
+        </div>
+      ))
+      }
+
+      <Button variant="contained" color="primary" size="small" border="gray"
+        onClick={() => {let newTags = [...tags, ""];
+                        setTags(newTags);
+        }}>
+        <b>Add Tag</b>
+      </Button>
+
       <h2>Description (Optional)</h2>
       <OutlinedInput
         // id={index}
@@ -173,7 +230,7 @@ function NewRecipeForm() {
         }}
       />
 
-    <h2>Rating (Optional)</h2>
+      <h2>Rating (Optional)</h2>
       <OutlinedInput
         // id={index}
         type="text"
