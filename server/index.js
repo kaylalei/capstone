@@ -525,8 +525,8 @@ async function getRecipeAmericasTestKitchen() {
 
         // 16489
         // 2295
-        // let recipeNums = [2295, 16489, 14903] // all good
-        let recipeNums = [16505, 10441, 366, 13333, 16202, 6558, 16019, 16491];
+        let recipeNums = [8114, 9253, 11519, 13772, 2295, 15407, 1335, 14903, 16619, 16505] // all good
+        // let recipeNums = [16505, 10441, 366, 13333, 16202, 6558, 16019, 16491];
         for (let i of recipeNums) {
         // for (let i = 1; i < 4; i++) {
             const recipeUrl = `https://www.americastestkitchen.com/recipes/${i}`;
@@ -640,9 +640,9 @@ async function getRecipeAmericasTestKitchen() {
 
             
 
-            // console.log(recipeObject)
+            console.log(recipeObject)
             // title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, recipeUrl
-            testDataa.push(recipeObject);
+            // testDataa.push(recipeObject);
 
             /*
             breakfast recipes -> Breakfast & Brunch
@@ -723,10 +723,10 @@ async function getRecipeAmericasTestKitchen() {
         // console.log(row3); // Third object
 
         // await client.end();
-        for (recipe of testDataa) {
-            console.log("recipe: ", recipe.title)
-            getIngredientNames(recipe.ingredients)
-        }
+        // for (recipe of testDataa) {
+        //     console.log("recipe: ", recipe.title)
+        //     getIngredientNames(recipe.ingredients)
+        // }
         console.log("closing browser");
         await browser.close();
     } catch (error) {
@@ -734,7 +734,7 @@ async function getRecipeAmericasTestKitchen() {
     }
 }
 
-// getRecipeAmericasTestKitchen()
+getRecipeAmericasTestKitchen()
 
 
 
@@ -840,7 +840,7 @@ async function getRecipeRecommendations(userIngredients, recipeCategory) {
             "curry powder", "mustard seeds", "rosemary", "peppercorns",
             "cardamom", "cayenne pepper", "chili flakes", "soy sauce",
             "parsley", "cilantro", "corriander", "celery seeds", "lemon",
-            "lime"
+            "lime", "oil", "powder", "garlic", "soda", "seeds", "seed"
         ]);
 
         // console.log(res.rowCount)
@@ -927,6 +927,7 @@ app.post('/api/search-recipes', async (req, res) => {
     // );`;
 
     // let results = await client.query(selectQueryText);
+    let results = [];
 
     for (let category of ['breakfast', 'lunch', 'dessert']) {
         let recipes = await client.query(
@@ -935,25 +936,33 @@ app.post('/api/search-recipes', async (req, res) => {
             WHERE EXISTS (
             SELECT 1
             FROM unnest(ingredients) AS ingredient
-            WHERE ingredient ILIKE '%${searchPhrase.searchText}%'`
+            WHERE ingredient ILIKE '%${searchPhrase.searchText}%');`
         )
         results = [...results, ...recipes.rows];
     }
 
     // remove duplicates
-    results = [...new Set(results)];
+    let resultsWithoutDuplicates = [];
+    console.log(results.length)
+    let seen = new Set();
+    for (recipe of results) {
+        console.log(seen, recipe.title);
+        if (!seen.has(recipe.title)) resultsWithoutDuplicates.push(recipe);
+        seen.add(recipe.title);
+    }    
+    console.log(resultsWithoutDuplicates.length)
 
     // pair into tuples
-    let tuplesResults = [];
-    for (let i = 0; i < results.length; i += 2) {
-        let left = results[i];
-        if (i+1 < results.length) right = results[i+1];
+    let resultsTuples = [];
+    for (let i = 0; i < resultsWithoutDuplicates.length; i += 2) {
+        let left = resultsWithoutDuplicates[i];
+        if (i+1 < resultsWithoutDuplicates.length) right = resultsWithoutDuplicates[i+1];
         else right = null;
         
-        tuplesResults.push([left, right]);
+        resultsTuples.push([left, right]);
     }
 
-    res.status(200).json({message: tuplesResults});
+    res.status(200).json({message: resultsTuples});
 
 
     // do this select on each of the four tables
