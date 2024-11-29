@@ -81,8 +81,8 @@ function NewRecipeForm() {
         url: url
       };
       console.log(newRecipe);
-      // const response = await fetch('http://localhost:8080/api/new-recipe', {
-      const response = await fetch('http://172.26.0.79:8080/api/new-recipe', {
+      const response = await fetch('http://localhost:8080/api/new-recipe', {
+      // const response = await fetch('http://172.26.0.79:8080/api/new-recipe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRecipe),

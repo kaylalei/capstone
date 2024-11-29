@@ -16,7 +16,7 @@ import RssFeedRoundedIcon from '@mui/icons-material/RssFeedRounded';
 import { Star, StarHalf, StarBorder } from '@mui/icons-material';
 import Button from '@mui/material/Button';
 
-const breakfastCardData = [
+const breakfastCardData = [[
   {
     img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_Buttermilk_Blueberry_Pancakes_428_bnruvy',
     tags: ['Main Courses', 'Fruit', 'Breakfast & Brunch'],
@@ -37,9 +37,9 @@ const breakfastCardData = [
     ratings: 100,
     url: 'https://www.americastestkitchen.com/recipes/1335'
   },
-];
+]];
 
-const lunchCardData = [
+const lunchCardData = [[
   {
     img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/1337_cvr-sfs-bstchixdumpsup-col0018-article',
     tags: ['Main Courses', 'US & Canada', 'American', 'Southern', 'Poultry', 'Chicken', 'Stews'],
@@ -59,9 +59,9 @@ const lunchCardData = [
     ratings: 260,
     url: 'https://www.americastestkitchen.com/recipes/15407'
   },
-];
+]];
 
-const dinnerCardData = [
+const dinnerCardData = [[
   {
     img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/43960-sfs-indian-butter-chicken-for-two-35-1',
     tags: ['Main Courses', 'Asia', 'Indian', 'Poultry', 'Chicken'],
@@ -82,9 +82,9 @@ const dinnerCardData = [
     ratings: 341,
     url: 'https://www.americastestkitchen.com/recipes/13772'
   },
-];
+]];
 
-const dessertCardData = [
+const dessertCardData = [[
   {
     img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/22419_sfs-french-apple-tart-15',
     tags: ['Desserts or Baked Goods', 'Fruit', 'Make Ahead', 'Fruit Desserts', 'Tarts'],
@@ -105,11 +105,11 @@ const dessertCardData = [
     ratings: 562,
     url: 'https://www.americastestkitchen.com/recipes/9253'
   },
-];
+]];
 
 
 
-const allCategoryCardData = [
+const allCategoryCardData = [[
   {
     img: 'https://res.cloudinary.com/hksqkdlah/image/upload/ar_1:1,c_fill,dpr_2.0,f_auto,fl_lossy.progressive.strip_profile,g_faces:auto,q_auto:low,w_344/SFS_SouthernStyleCastIronSkilletCornbread-28_fhvwze',
     tags: ['Main Courses', 'Grains', 'Quick Breads'],
@@ -130,7 +130,7 @@ const allCategoryCardData = [
     ratings: 82,
     url: 'https://www.americastestkitchen.com/recipes/16505'
   },
-];
+]];
 
 const SyledCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -260,7 +260,8 @@ export default function MainContent() {
       const searchPhrase = {
           searchText: searchText
       };
-      const response = await fetch('http://172.26.0.79:8080/api/search-recipes', {
+      const response = await fetch('http://localhost:8080/api/search-recipes', {
+      // const response = await fetch('http://172.26.0.79:8080/api/search-recipes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(searchPhrase),
@@ -306,7 +307,8 @@ export default function MainContent() {
           description: recipe.description,
           stars: recipe.rating,
           ratings: recipe.ratingcount,
-          url: recipe.url
+          url: recipe.url,
+          recipeObject: recipe  // should be the recipe object
         }
         searchResults.push(recipeCard);
       }
@@ -317,7 +319,7 @@ export default function MainContent() {
 
 
     } catch (error) {
-      console.error('Error saving recipe in database: ', error);
+      console.error('Error searching recipes: ', error);
     }
   }
 
@@ -434,6 +436,9 @@ export default function MainContent() {
             </Button>
         </Box>
       </Box>
+
+
+    {cardData.map(([leftCard, rightCard]) => (
       <Grid container spacing={2} columns={12}>
         <Grid size={{ xs: 12, md: 6 }}>
           <SyledCard
@@ -446,7 +451,7 @@ export default function MainContent() {
             <CardMedia
               component="img"
               alt="green iguana"
-              image={cardData[0].img}
+              image={leftCard.img}
               sx={{
                 aspectRatio: '16 / 9',
                 borderBottom: '1px solid',
@@ -454,24 +459,6 @@ export default function MainContent() {
               }}
             />
             <SyledCardContent>
-
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               <Box
                 sx={{
                   display: 'inline-flex',
@@ -480,7 +467,7 @@ export default function MainContent() {
                   overflow: 'auto',
                 }}
               >
-                {cardData[0].tags.map((tag) => (
+                {leftCard.tags.map((tag) => (
                   <Chip
                     size="medium" 
                     label={tag}
@@ -491,16 +478,19 @@ export default function MainContent() {
               </Box>
 
               <Typography gutterBottom variant="h6" component="div">
-                {cardData[0].title}
+                {leftCard.title}
               </Typography>
               <StyledTypography variant="body2" color="text.secondary" gutterBottom>
-                {cardData[0].description}
+                {leftCard.description}
               </StyledTypography>
-              <Stars starCount={cardData[0].stars} ratings={cardData[0].ratings} />
+              <Stars starCount={leftCard.stars} ratings={leftCard.ratings} />
+              <Button variant="outlined"
+                onClick={() => console.log("recipe selected - somehow send the RECIPE OBJECT to alena")}
+              >Cook this recipe</Button>
             </SyledCardContent>
-            
           </SyledCard>
         </Grid>
+        {rightCard === null ? <p/> :
         <Grid size={{ xs: 12, md: 6 }}>
           <SyledCard
             variant="outlined"
@@ -512,7 +502,7 @@ export default function MainContent() {
             <CardMedia
               component="img"
               alt="green iguana"
-              image={cardData[1].img}
+              image={rightCard.img}
               aspect-ratio="16 / 9"
               sx={{
                 borderBottom: '1px solid',
@@ -520,34 +510,38 @@ export default function MainContent() {
               }}
             />
             <SyledCardContent>
-            <Box
-              sx={{
-                display: 'inline-flex',
-                flexDirection: 'row',
-                gap: 3,
-                overflow: 'auto',
-              }}
-            >
-              {cardData[0].tags.map((tag) => (
-                <Chip
-                  size="medium" 
-                  label={tag}
-                  sx={{
-                    backgroundColor: 'light gray'
-                  }} />
-              ))}
-            </Box>
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  flexDirection: 'row',
+                  gap: 3,
+                  overflow: 'auto',
+                }}
+              >
+                {rightCard.tags.map((tag) => (
+                  <Chip
+                    size="medium" 
+                    label={tag}
+                    sx={{
+                      backgroundColor: 'light gray'
+                    }} />
+                ))}
+              </Box>
               <Typography gutterBottom variant="h6" component="div">
-                {cardData[1].title}
+                {rightCard.title}
               </Typography>
               <StyledTypography variant="body2" color="text.secondary" gutterBottom>
-                {cardData[1].description}
+                {rightCard.description}
               </StyledTypography>
-              <Stars starCount={cardData[1].stars} ratings={cardData[1].ratings} />
+              <Stars starCount={rightCard.stars} ratings={rightCard.ratings} />
+              <Button variant="outlined"
+                onClick={() => console.log("recipe selected - somehow send the RECIPE OBJECT to alena")}
+              >Cook this recipe</Button>
             </SyledCardContent>
           </SyledCard>
-        </Grid>
+        </Grid>}
       </Grid>
+    ))}
     </Box>
   );
 }
