@@ -640,9 +640,9 @@ async function getRecipeAmericasTestKitchen() {
 
             
 
-            console.log(recipeObject)
+            // console.log(recipeObject)
             // title, tags, description, imageUrl, rating, ratingCount, timeAndServings, ingredients, steps, recipeUrl
-            // testDataa.push(recipeObject);
+            testDataa.push(recipeObject);
 
             /*
             breakfast recipes -> Breakfast & Brunch
@@ -734,7 +734,7 @@ async function getRecipeAmericasTestKitchen() {
     }
 }
 
-getRecipeAmericasTestKitchen()
+// getRecipeAmericasTestKitchen()
 
 
 
@@ -840,7 +840,7 @@ async function getRecipeRecommendations(userIngredients, recipeCategory) {
             "curry powder", "mustard seeds", "rosemary", "peppercorns",
             "cardamom", "cayenne pepper", "chili flakes", "soy sauce",
             "parsley", "cilantro", "corriander", "celery seeds", "lemon",
-            "lime", "oil", "powder", "garlic", "soda", "seeds", "seed"
+            "lime", "oil", "powder", "garlic", "soda", "seeds", "seed", "sugar"
         ]);
 
         // console.log(res.rowCount)
